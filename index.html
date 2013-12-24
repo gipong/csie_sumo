@@ -1,0 +1,21 @@
+<html>
+<body>
+
+<form action="kml2sumo_multi_upload.php" method="post"
+enctype="multipart/form-data">
+<label for="file">KML Filename:</label>
+<input type="file" name="file" id="file"><br>
+<!-- Timezone:<input type="text" name="timezone" id="timezone"><br>  -->
+<input type="submit" name="submit" value="Submit">
+</form>
+KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.kml(without folder element)</a><hr>
+<form action="osm2sumo_upload.php" method="post"
+enctype="multipart/form-data">
+<label for="file">OSM Filename:</label>
+<input type="file" name="file" id="file"><br>
+<input type="submit" name="submit" value="Submit">
+</form>
+OSM test data:<a href="upload/map2.osm">map2.osm</a><hr>
+
+</body>
+</html>
