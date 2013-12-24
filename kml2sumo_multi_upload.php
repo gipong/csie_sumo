@@ -1,4 +1,5 @@
 <?php
+	require('gPoint.php');
 	
 	move_uploaded_file($_FILES["file"]["tmp_name"],"upload/".$_FILES["file"]["name"]);
 	
@@ -41,6 +42,46 @@
 		$ans['y'] = 6378.137*1000*cos($lat2)*sin($lng2);
 		$ans['s'] = $s;
 
+		return $ans;
+	}
+	
+	function trans_utm2($lng, $lat) {
+		$k0 = 0.9996;
+		$a = 6378137.0;
+		$b = 6356752.314;
+		$f = 0.003352811;	
+		$e2 = 2*$f - $f*$f;
+		$falseEasting = 0.0;
+		
+		$LongTemp = ($lng+180)-(integer)(($lng+180)/360)*360-180; // -180.00 .. 179.9;
+		$LatRad = deg2rad($lat);
+		$LongRad = deg2rad($LongTemp);
+		
+		$LongOriginRad = deg2rad($lng);
+ 
+		$eccPrimeSquared = ($e2)/(1-$e2);
+ 
+		$N = $a/sqrt(1-$e2*sin($LatRad)*sin($LatRad));
+		$T = tan($LatRad)*tan($LatRad);
+		$C = $eccPrimeSquared*cos($LatRad)*cos($LatRad);
+		$A = cos($LatRad)*($LongRad-$LongOriginRad);
+ 
+		$M = $a*((1	- $e2/4		- 3*$e2*$e2/64	- 5*$e2*$e2*$e2/256)*$LatRad 
+							- (3*$e2/8	+ 3*$e2*$e2/32	+ 45*$e2*$e2*$e2/1024)*sin(2*$LatRad)
+												+ (15*$e2*$e2/256 + 45*$e2*$e2*$e2/1024)*sin(4*$LatRad) 
+												- (35*$e2*$e2*$e2/3072)*sin(6*$LatRad));
+	
+		$utmEasting = ($k0*$N*($A+(1-$T+$C)*$A*$A*$A/6
+						+ (5-18*$T+$T*$T+72*$C-58*$eccPrimeSquared)*$A*$A*$A*$A*$A/120)
+						+ $falseEasting);
+ 
+		$utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
+					 + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
+		
+		if($lat < 0) $utmNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
+		
+		$ans['x'] = $utmEasting;
+		$ans['y'] = $utmNorthing;
 		return $ans;
 	}
 	
@@ -360,8 +401,19 @@
 		return $utm;
 	}
 	
+	function Trans_UTM($lat, $lon) {
+		$temp = new gPoint();
+		$temp->setLongLat($lon, $lat);
+		$temp->convertLLtoTM();
+		
+		$ans['x'] = $temp->utmEasting;
+		$ans['y'] = $temp->utmNorthing;
+		return $ans;
+	}
+	
 	foreach($node_list as $key => $value) {
-		$transCod = trans(0, 0, (float)$node_list[$key][0], (float)$node_list[$key][1]);	
+		//$transCod = trans(0, 0, (float)$node_list[$key][0], (float)$node_list[$key][1]);	
+		$transCod = Trans_UTM((float)$node_list[$key][0], (float)$node_list[$key][1]);	
 		//$transCod = UTM((float)$node_list[$key][1], (float)$node_list[$key][0]);
 		array_push($offset_x, $transCod['x']);
 		array_push($offset_y, $transCod['y']);
@@ -374,14 +426,17 @@
 	
 	$csv_content = '';
 	foreach($node_list as $key => $value) {
-		$transCod = trans(0, 0, (float)$node_list[$key][0], (float)$node_list[$key][1]);	
+		//$transCod = trans(0, 0, (float)$node_list[$key][0], (float)$node_list[$key][1]);	
+		$transCod = Trans_UTM((float)$node_list[$key][0], (float)$node_list[$key][1]);	
 		//$transCod = UTM((float)$node_list[$key][1], (float)$node_list[$key][0]);
 		//var_dump($transCod);
-		$string = "\n<node id='".$key."' x='".bcadd($transCod['x'], $off_x, 6)."' y='".bcadd($transCod['y'], $off_y, 6)."' type='traffic_light' />";
+		$string = "\n<node id='".$key."' x='".$transCod['x']."' y='".$transCod['y']."' type='traffic_light' />";
+		
+		//$string = "\n<node id='".$key."' x='".bcadd($transCod['x'], $off_x, 6)."' y='".bcadd($transCod['y'], $off_y, 6)."' type='traffic_light' />";
 		//$string = "\n<node id='".$key."' x='".bcadd($transCod['lon'], $off_x, 6)."' y='".bcadd($transCod['lat'], $off_y, 6)."' type='traffic_light' />";
 		$node_content = $node_content.$string;
-		$csv_string = bcadd($transCod['x'], $off_x, 6).", ".bcadd($transCod['y'], $off_y, 6)."\n";
-		//$csv_string = $transCod['y'].", ".$transCod['x']."\n";
+		//$csv_string = bcadd($transCod['x'], $off_x, 6).", ".bcadd($transCod['y'], $off_y, 6)."\n";
+		$csv_string = $transCod['y'].", ".$transCod['x']."\n";
 		$csv_content = $csv_content.$csv_string;
 	}
 	
