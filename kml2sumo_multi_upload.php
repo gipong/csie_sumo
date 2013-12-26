@@ -9,6 +9,7 @@
 	else
 		$allLine = $kml->Document->Placemark;
 	$numLine = count($allLine);
+	$tolerance = $_POST['tolerance']; // unit: meters
 	
 	$node_content = '';
 	$edge_content = '';
@@ -21,69 +22,6 @@
 	$rel_list = array();
 	$output_list = array();
 	
-	/* array('x'=>xdis, 'y'=>ydis, 's'=>dis) */
-	function trans($lng1,$lat1,$lng2,$lat2) {
-	
-		$radLat1=deg2rad($lat1);
-		$radLat2=deg2rad($lat2);
-		$radLng1=deg2rad($lng1);
-		$radLng2=deg2rad($lng2);
-		$a=$radLat1-$radLat2;
-		$b=$radLng1-$radLng2;
-		$s=2*asin(sqrt(pow(sin($a/2),2)+cos($radLat1)*cos($radLat2)*pow(sin($b/2),2)))*6378.137*1000;
-		
-		$ang = atan((cos($radLat2)*sin($b/2))/(cos($radLat1)*sin($radLat2)-sin($radLat1)*cos($radLat2)*cos($b/2)));
-		//$ang = atan($lat2/$lng2);
-		
-		
-		//$ans['x'] = $s*cos($ang);
-		$ans['x'] = 6378.137*1000*cos($lat2)*cos($lng2);
-		//$ans['y'] = $s*sin($ang);
-		$ans['y'] = 6378.137*1000*cos($lat2)*sin($lng2);
-		$ans['s'] = $s;
-
-		return $ans;
-	}
-	
-	function trans_utm2($lng, $lat) {
-		$k0 = 0.9996;
-		$a = 6378137.0;
-		$b = 6356752.314;
-		$f = 0.003352811;	
-		$e2 = 2*$f - $f*$f;
-		$falseEasting = 0.0;
-		
-		$LongTemp = ($lng+180)-(integer)(($lng+180)/360)*360-180; // -180.00 .. 179.9;
-		$LatRad = deg2rad($lat);
-		$LongRad = deg2rad($LongTemp);
-		
-		$LongOriginRad = deg2rad($lng);
- 
-		$eccPrimeSquared = ($e2)/(1-$e2);
- 
-		$N = $a/sqrt(1-$e2*sin($LatRad)*sin($LatRad));
-		$T = tan($LatRad)*tan($LatRad);
-		$C = $eccPrimeSquared*cos($LatRad)*cos($LatRad);
-		$A = cos($LatRad)*($LongRad-$LongOriginRad);
- 
-		$M = $a*((1	- $e2/4		- 3*$e2*$e2/64	- 5*$e2*$e2*$e2/256)*$LatRad 
-							- (3*$e2/8	+ 3*$e2*$e2/32	+ 45*$e2*$e2*$e2/1024)*sin(2*$LatRad)
-												+ (15*$e2*$e2/256 + 45*$e2*$e2*$e2/1024)*sin(4*$LatRad) 
-												- (35*$e2*$e2*$e2/3072)*sin(6*$LatRad));
-	
-		$utmEasting = ($k0*$N*($A+(1-$T+$C)*$A*$A*$A/6
-						+ (5-18*$T+$T*$T+72*$C-58*$eccPrimeSquared)*$A*$A*$A*$A*$A/120)
-						+ $falseEasting);
- 
-		$utmNorthing = ($k0*($M+$N*tan($LatRad)*($A*$A/2+(5-$T+9*$C+4*$C*$C)*$A*$A*$A*$A/24
-					 + (61-58*$T+$T*$T+600*$C-330*$eccPrimeSquared)*$A*$A*$A*$A*$A*$A/720)));
-		
-		if($lat < 0) $utmNorthing += 10000000.0; //10000000 meter offset for southern hemisphere
-		
-		$ans['x'] = $utmEasting;
-		$ans['y'] = $utmNorthing;
-		return $ans;
-	}
 	
 	function addNode($lineNum, $i, $x,$y) {
 		global $node_list;
@@ -160,7 +98,7 @@
 	}
 	
 	function distance($lat1, $lng1, $lat2, $lng2) {
-
+	/*
 		$earthRadius = 3958.75;
 		$dLat = deg2rad($lat2-$lat1);
 		$dLng = deg2rad($lng2-$lng1);
@@ -170,7 +108,16 @@
 		   sin($dLng/2) * sin($dLng/2);
 		$c = 2 * atan2(sqrt($a), sqrt(1-$a));
 		$dist = $earthRadius * $c;
-		return $geopointDistance;
+		return $dist;
+	*/
+	
+		$theta = $lng1 - $lng2;
+		$dist = sin(deg2rad($lat1))*sin(deg2rad($lat2))+cos(deg2rad($lat1))*cos(deg2rad($lat2))*cos(deg2rad($theta));
+		$dist = acos($dist);
+		$dist = rad2deg($dist);
+		$miles = $dist * 60 * 1.1515;
+		
+		return $miles*1.609344*1000;
 	}
 
 	
@@ -209,7 +156,52 @@
 			if($a['x'] != '') {
 				$crosName = crosNode($a, $crossCount);
 				//crosLine($a, $r, $i, $rel_list[$r], $rel_list[$i]);	
-				array_push($output_list[$r], $crosName);
+				
+				$dist_bin = distance(
+					$node_list[$rel_list[$r][0]][0], 
+					$node_list[$rel_list[$r][0]][1],
+					$a['x'],
+					$a['y']
+					);
+					
+				$dist_end = distance(
+					$node_list[$rel_list[$r][1]][0], 
+					$node_list[$rel_list[$r][1]][1],
+					$a['x'],
+					$a['y']
+					);
+				if($dist_bin == 0 or $dist_end == 0) continue;
+				echo "dist: $dist_bin , $dist_end <br />";	
+				$temp_cross = array();	
+				
+				if($dist_bin > $tolerance && $dist_end > $tolerance) {
+					array_push($output_list[$r], $crosName);
+				}elseif($dist_bin > $tolerance && $dist_end < $tolerance) {
+					$key = array_search($rel_list[$r][1], $output_list[$r]);
+					unset($output_list[$r][$key]);
+						echo "dist_end $key: $dist_end <br />";
+					array_push($output_list[$r], $crosName);
+				}elseif($dist_bin < $tolerance && $dist_end > $tolerance) {
+				/*
+					$key = array_search($rel_list[$r][1], $output_list[$r]);
+					unset($output_list[$r][$key]);
+						//echo "unset: "+$node_list[$rel_list[$r][1]]+"<br />";
+					array_push($output_list[$r], $crosName);
+				*/
+					$key = array_search($rel_list[$r][0], $output_list[$r]);
+					unset($output_list[$r][$key]);
+						echo "dist_bin $key: $dist_bin <br />";
+					array_push($output_list[$r], $crosName);
+				
+				}else {
+					$key = array_search($rel_list[$r][0], $output_list[$r]);
+					unset($output_list[$r][$key]);
+					$key = array_search($rel_list[$r][1], $output_list[$r]);
+					unset($output_list[$r][$key]);
+						//echo "unset: "+$node_list[$rel_list[$r][0]]+"<br />";
+						//echo "unset: "+$node_list[$rel_list[$r][1]]+"<br />";
+					array_push($output_list[$r], $crosName);
+				}
 				$crossCount++;
 				//echo $a['x']." , ".$a['y']." , cross node Finish<br />";
 			}
@@ -226,15 +218,26 @@
 	 */
 	
 	$IR = count($output_list);
-	for($r=0; $r < $ir; $r++) {
+	for($r=0; $r < $IR; $r++) {
 		$sort = array();
 		$cont = count($output_list[$r]);
+		/*
 		for($y=0; $y < $cont; $y++){
-			$temp = $output_list[$r][$y];
+			var_dump($output_list[$r]);
+			if(!isset($output_list[$r][0])) {
+				$Y = $y+1;
+				$temp = $output_list[$r][$Y];
+			}else 
+				$temp = $output_list[$r][$y];
+				
+			echo "temp: $temp<br />";
 			$sort[$temp] = $node_list[$temp][0];
 		}
+		*/
+		foreach($output_list[$r] as $key => $value) {
+			$sort[$value] = $node_list[$value][0];
+		}
 		asort($sort);
-		
 		
 		$output_array = array();
 		foreach($sort as $key => $value) {
@@ -245,6 +248,7 @@
 		for($y=0; $y < $cont; $y++){
 			if($y == $cont-1) continue;
 			else $Y = $y+1;
+			
 			//if(distance($node_list[$output_array[$y]][1], $node_list[$output_array[$y]][0], $node_list[$output_array[$Y]][1], $node_list[$output_array[$Y]][0]) > $_POST['tolerance']) {
 				$string = "\n<edge id='".$r.'_'.$idNum."-1' fromnode='".$output_array[$y]."' tonode='".$output_array[$Y]."' priority='75' nolanes='2' speed='40' />".
 						"\n<edge id='".$r.'_'.$idNum."-2' fromnode='".$output_array[$Y]."' tonode='".$output_array[$y]."' priority='75' nolanes='2' speed='40' />";
@@ -256,150 +260,6 @@
 	}
 	//var_dump($output_list);
 	//var_dump($sort);
-	
-	function ToLL($north, $east, $utmZone) { 
-		// This is the lambda knot value in the reference
-		$LngOrigin = Deg2Rad($utmZone * 6 - 183);
-
-		// WGS84 datum  
-		$FalseNorth = 0;   // South or North?
-		//if (lat < 0.) FalseNorth = 10000000.  // South or North?
-		//else          FalseNorth = 0.   
-
-		$Ecc = 0.081819190842622;       // Eccentricity
-		$EccSq = $Ecc * $Ecc;
-		$Ecc2Sq = $EccSq / (1. - $EccSq);
-		$Ecc2 = sqrt($Ecc2Sq);      // Secondary eccentricity
-		$E1 = ( 1 - sqrt(1-$EccSq) ) / ( 1 + sqrt(1-$EccSq) );
-		$E12 = $E1 * $E1;
-		$E13 = $E12 * $E1;
-		$E14 = $E13 * $E1;
-
-		$SemiMajor = 6378137.0;         // Ellipsoidal semi-major axis (Meters)
-		$FalseEast = 500000.0;          // UTM East bias (Meters)
-		$ScaleFactor = 0.9996;          // Scale at natural origin
-
-		// Calculate the Cassini projection parameters
-
-		$M1 = ($north - $FalseNorth) / $ScaleFactor;
-		$Mu1 = $M1 / ( $SemiMajor * (1 - $EccSq/4.0 - 3.0*$EccSq*$EccSq/64.0 - 5.0*$EccSq*$EccSq*$EccSq/256.0) );
-
-		$Phi1 = $Mu1 + (3.0*$E1/2.0 - 27.0*$E13/32.0) * sin(2.0*$Mu1);
-		+ (21.0*$E12/16.0 - 55.0*$E14/32.0)           * sin(4.0*$Mu1);
-		+ (151.0*$E13/96.0)                          * sin(6.0*$Mu1);
-		+ (1097.0*$E14/512.0)                        * sin(8.0*$Mu1);
-
-		$sin2phi1 = sin($Phi1) * sin($Phi1);
-		$Rho1 = ($SemiMajor * (1.0-$EccSq) ) / pow(1.0-$EccSq*$sin2phi1,1.5);
-		$Nu1 = $SemiMajor / sqrt(1.0-$EccSq*$sin2phi1);
-
-		// Compute parameters as defined in the POSC specification.  T, C and D
-
-		$T1 = tan($Phi1) * tan($Phi1);
-		$T12 = $T1 * $T1;
-		$C1 = $Ecc2Sq * cos($Phi1) * cos($Phi1);
-		$C12 = $C1 * $C1;
-		$D  = ($east - $FalseEast) / ($ScaleFactor * $Nu1);
-		$D2 = $D * $D;
-		$D3 = $D2 * $D;
-		$D4 = $D3 * $D;
-		$D5 = $D4 * $D;
-		$D6 = $D5 * $D;
-
-		// Compute the Latitude and Longitude and convert to degrees
-		$lat = $Phi1 - $Nu1*tan($Phi1)/$Rho1 * ( $D2/2.0 - (5.0 + 3.0*$T1 + 10.0*$C1 - 4.0*$C12 - 9.0*$Ecc2Sq)*$D4/24.0 + (61.0 + 90.0*$T1 + 298.0*$C1 + 45.0*$T12 - 252.0*$Ecc2Sq - 3.0*$C12)*$D6/720.0 );
-		$lat = Rad2Deg($lat);
-		$lon = $LngOrigin + ($D - (1.0 + 2.0*$T1 + $C1)*$D3/6.0 + (5.0 - 2.0*$C1 + 28.0*$T1 - 3.0*$C12 + 8.0*$Ecc2Sq + 24.0*$T12)*$D5/120.0) / cos($Phi1);
-		$lon = Rad2Deg($lon);
-
-		$PC_LatLon['lat'] = $lat;
-		$PC_LatLon['lon'] = $lon;
-		
-		return $PC_LatLon;
-	}
-	
-	function WGS84toUTM($lat_l, $lon_l) {
-	//WGS84 info, a = 6378137.0 b = 6356752.314 f = 0.003352811 1/f = 298.2572236
-		$a = 6378137.0;
-		$b = 6356752.314;
-		$f = 0.003352811;
-		$in_f = 298.2572236;
-		
-		$lat = deg2rad($lat_l);
-		$lon = deg2rad($lon_l);
-		$lon0 = 6*((int)($lon_l/6)+31)-183;
-		echo $lon0;
-		$k0 = 0.9996;
-		$e = sqrt(1-$b*$b/$a*$a);
-		$e2 = $e*$e/(1-$e*$e);
-		$n = ($a-$b)/($a+$b);
-		$rho = $a*(1-$e*$e)/pow(1-pow(($e*sin($lat)), 2),(3.0/2));
-		
-		$nu = $a/pow((1-pow($e*sin($lat), 2)),0.5);
-		$p = ($lon-$lon0)*3600/10000;
-		$sin1 = M_PI/(180*60*60);
-		
-		$A = $a*(1 - $n + (5.0/4)*(pow($n, 2) - pow($n, 3)) + (81.0/64)*(pow($n, 4) - pow($n, 5)));
-		$B = (3*$a*$n/2)*(1 - $n + (7.0/8)*(pow($n, 2) - pow($n, 3)) + (55.0/64)*(pow($n, 4) - pow($n, 5)));
-		$C = (15*$a*pow($n, 2)/16)*(1 - $n + (3.0/4)*(pow($n, 2) - pow($n, 3)));
-		$D = (35*$a*pow($n, 3)/48)*(1 - $n + (11.0/16)*(pow($n, 2) - pow($n, 3)));
-		$E = (315*$a*pow($n, 4)/51)*(1 - $n);
-		$S = $A*$lat - $B*sin(2*$lat) + $C*sin(4*$lat) - $D*sin(6*$lat) + $E*sin(8*$lat);
-		
-		$K1 = $S*$k0;
-		$K2 = $nu*sin($lat)*cos($lat)*pow($sin1, 2)*$k0*100000000/2;
-		$K3 = (pow($sin1, 4)*$nu*sin($lat)*pow(cos($lat), 3)/24)*(5 - pow(tan($lat), 2) + 9*$e2*pow(cos($lat), 2) + 4*pow($e2, 2)*pow(cos($lat), 4))*$k0*10000000000000000;
-		$UTMNorthing = $K1 + $K2*pow($p, 2) + $K3*pow($p, 4);
-		//south sphere 10000000m FN
-		//$UTMNorthing += $FN;
-		
-		$K4 = $k0*$sin1*$nu*cos($lat)*10000;
-		$K5 = ($sin1*pow(cos($lat), 3))*($nu/6)*(1 - pow(tan($lat), 2) + $e2*pow(cos($lat), 2))*$k0*1000000000000;
-		$UTMEasting = $K4*$p + $K5*pow($p, 3) + 500000;
-		
-		$utm['lon'] = $UTMEasting;
-		$utm['lat'] = $UTMNorthing;
-		var_dump($utm);
-		
-		return $utm;
-	}
-	
-	function UTM($lat, $lon) {
-		$a = 6378137.0;
-		$b = 6356752.314;
-		$f = 0.003352811;	
-		$eSquare = 2*$f - $f*$f;
-		$k0 = 0.9996;
-		
-		$lonTemp = ($lon+180)-(int)(($lon+180)/360)*360-180;
-		$latRad = deg2rad($lat);
-		$lonRad = deg2rad($lonTemp);
-		$lonOriginRad = 6*((int)($lon/6) +31)-183;
-    	$e2Square = ($eSquare)/(1-$eSquare);
-
-		$V = $a/sqrt( 1-$eSquare*pow(sin($latRad),2) );
-		$T = pow(tan($latRad), 2);
-		$C = $e2Square*pow(cos($latRad), 2);
-		$A = cos($latRad)*($lonRad-$lonOriginRad);
-		$M = $a*((1-$eSquare/4-3*pow($eSquare, 2)/64-5*pow($eSquare, 3)/256)*$latRad
-		-(3*$eSquare/8+3*pow($eSquare, 2)/32+45*pow($eSquare, 3)/1024)*sin(2*$latRad)
-		+(15*pow($eSquare, 2)/256+45*pow($eSquare, 3)/1024)*sin(4*$latRad)
-		-(35*pow($eSquare, 3)/3072)*sin(6*$latRad));
-
-		
-		$UTMEasting = $k0*$V*($A+(1-$T+$C)*pow($A, 3)/6
-		+ (5-18*$T+$T*$T+72*$C-58*$e2Square)*pow($A, 5)/120)+ 500000.0;
-		
-		$UTMNorthing = $k0*($M+$V*tan($latRad)*(pow($A, 2)/2+(5-$T+9*$C+4*pow($C, 2))*pow($A, 4)/24
-		+(61-58*$T+pow($T, 2)+600*$C-330*$e2Square)*pow($A, 6)/720));
-		
-		//UTMNorthing += FN
-		$utm['lon'] = $UTMEasting;
-		$utm['lat'] = $UTMNorthing;
-		
-		
-		return $utm;
-	}
 	
 	function Trans_UTM($lat, $lon) {
 		$temp = new gPoint();
