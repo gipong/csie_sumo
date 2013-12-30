@@ -5,6 +5,7 @@
 enctype="multipart/form-data">
 <label for="file">KML Filename:</label>
 <input type="file" name="file" id="file"><br>
+Tolerance:<input type="text" name="tolerance" id="tolerance"><br>
 <!-- Timezone:<input type="text" name="timezone" id="timezone"><br>  -->
 <input type="submit" name="submit" value="Submit">
 </form>
@@ -12,7 +13,11 @@ KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.
 <form action="osm2sumo_upload.php" method="post"
 enctype="multipart/form-data">
 <label for="file">OSM Filename:</label>
-<input type="file" name="file" id="file"><br>
+<input type="file" name="file" id="file"><br><br>
+North:<input type="text" name="north" id="north"><br>
+West :<input type="text" name="west" id="west"><br>
+East :<input type="text" name="east" id="east"><br>
+South:<input type="text" name="south" id="south"><br><br>
 <input type="submit" name="submit" value="Submit">
 </form>
 OSM test data:<a href="upload/map2.osm">map2.osm</a><hr>
