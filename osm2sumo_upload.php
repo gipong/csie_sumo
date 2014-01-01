@@ -8,6 +8,11 @@
 	$west = $_POST['west'];
 	$east = $_POST['east'];
 	
+	$cent_x = ($north + $south)/2;
+	$dis_x = abs($north - $cent_x);
+	
+	$cent_y = ($west + $east)/2;
+	$dis_y = abs($east - $cent_y);
 	
 	$osm = simplexml_load_file("upload/".$_FILES["file"]["name"]);
 	$node = $osm->node;
@@ -50,10 +55,29 @@
 			array_push($check_list, (string)$nd_index[$r_nd]['ref'], (string)$nd_index[$r_nd+1]['ref']);
 			//if($temp_compare[$nd_index[$r_nd]['ref']]<$north && $nd_index[$r_nd]['ref'])
 			$id1 = $nd_index[$r_nd]['ref'];
-			if((float)$temp_compare[sprintf("%d",$id1)][0]>(float)$west && (float)$temp_compare[sprintf("%d",$id1)][0]<(float)$east && (float)$temp_compare[sprintf("%d",$id1)][1]>(float)$south && (float)$temp_compare[sprintf("%d",$id1)][1]<(float)$north) {
+			$id2 = $nd_index[$r_nd+1]['ref'];
+			
+			/*
+			if((abs( (float)$temp_compare[sprintf("%d",$id1)][1]-(float)$cent_x ) > $dis_x && 
+				abs( (float)$temp_compare[sprintf("%d",$id1)][0]-(float)$cent_y ) > $dis_y ) or 
+				abs( ((float)$temp_compare[sprintf("%d",$id2)][1]-(float)$cent_x ) > $dis_x && 
+				abs( (float)$temp_compare[sprintf("%d",$id2)][0]-(float)$cent_y ) > $dis_y)) {
+				continue;
+			*/
+			
+			if(
+				((float)$temp_compare[sprintf("%d",$id1)][1] > (float)$south) && 
+				((float)$temp_compare[sprintf("%d",$id1)][1] < (float)$north) &&
+				((float)$temp_compare[sprintf("%d",$id1)][0] > (float)$west) &&
+				((float)$temp_compare[sprintf("%d",$id1)][0] < (float)$east)
+				
+			){
 				$string = "\n<edge id='".$r.'w'.$r_nd."-1' fromnode='".$nd_index[$r_nd]['ref']."' tonode='".$nd_index[($r_nd+1)]['ref']."' priority='75' nolanes='2' speed='40' />".
 						"\n<edge id='".$r.'w'.$r_nd."-2' fromnode='".$nd_index[($r_nd+1)]['ref']."' tonode='".$nd_index[$r_nd]['ref']."' priority='75' nolanes='2' speed='40' />";
 				$edge_content = $edge_content.$string;
+			}else {
+				
+				continue;
 			}
 		}
 	}
@@ -73,7 +97,7 @@
 	
 	$ori = "\n<node id='00' x='0' y='0' type='traffic_light' />";
 	
-	$node_file = '<nodes>'.$node_content."\n</nodes>\n<!-- offset_x: $off_x, offset_y: $off_y -->";
+	$node_file = '<nodes>'.$node_content."\n</nodes>\n";
 	$edge_file = '<edges>'.$edge_content."\n</edges>";
 	
 	$node_name = 'xml/nodes_om.xml';
