@@ -171,7 +171,7 @@
 					$a['y']
 					);
 				if($dist_bin == 0 or $dist_end == 0) continue;
-				echo "dist: $dist_bin , $dist_end <br />";	
+				
 				$temp_cross = array();	
 				
 				if($dist_bin > $tolerance && $dist_end > $tolerance) {
@@ -179,7 +179,7 @@
 				}elseif($dist_bin > $tolerance && $dist_end < $tolerance) {
 					$key = array_search($rel_list[$r][1], $output_list[$r]);
 					unset($output_list[$r][$key]);
-						echo "dist_end $key: $dist_end <br />";
+						
 					array_push($output_list[$r], $crosName);
 				}elseif($dist_bin < $tolerance && $dist_end > $tolerance) {
 				/*
@@ -190,7 +190,7 @@
 				*/
 					$key = array_search($rel_list[$r][0], $output_list[$r]);
 					unset($output_list[$r][$key]);
-						echo "dist_bin $key: $dist_bin <br />";
+						
 					array_push($output_list[$r], $crosName);
 				
 				}else {
@@ -308,16 +308,15 @@
 	
 	$node_name = 'xml/nodes_m.xml';
 	$edge_name = 'xml/edges_m.xml';
-	$csv_name = 'xml/coor.txt';
+	
 	file_put_contents($node_name, $node_file);
 	file_put_contents($edge_name, $edge_file);
-	file_put_contents($csv_name, $csv_content);
+	
 	
 	//var_dump($node_list);
 	//var_dump($rel_list);
 	//var_dump($offset_x);
 	echo '<a href="xml/nodes_m.xml" target="_blank">nodes_m.xml</a><br />';
 	echo '<a href="xml/edges_m.xml" target="_blank">edges_m.xml</a><br />';
-	echo '<a href="xml/coor.txt" target="_blank">coor.txt</a><br />';
 	echo '<a href="index.html">Home</a>';
 	
