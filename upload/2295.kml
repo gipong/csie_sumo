@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>2295.kml</name>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="s_ylw-pushpin_hl">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Style id="s_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+	</Style>
+	<Folder>
+		<name>未命名的資料夾</name>
+		<open>1</open>
+		<Placemark>
+			<name>未命名的路徑</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<tessellate>1</tessellate>
+				<coordinates>
+					95.23242091325456,22.92177606862794,0 95.24497532498388,22.89377799596215,0 95.23139169748986,22.8847509077582,0 95.23588168414565,22.87303003033857,0 95.28684126903534,22.80313900030557,0 95.32579716754457,22.79530656332338,0 95.38508776060341,22.78542008343577,0 95.41276439306928,22.76318143116571,0 95.52560567089914,22.74820165720909,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>未命名的路徑</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<tessellate>1</tessellate>
+				<coordinates>
+					95.30902317693438,22.66313332186552,0 95.41034206294408,22.74947826251487,0 95.4350892359565,22.79700141125276,0 95.40462341970297,22.85281647231436,0 95.3702599575881,22.94237423336486,0 95.37703854140385,22.96851376805313,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+		<Placemark>
+			<name>未命名的路徑</name>
+			<styleUrl>#m_ylw-pushpin</styleUrl>
+			<LineString>
+				<tessellate>1</tessellate>
+				<coordinates>
+					95.26821088759057,22.95160910336121,0 95.32083731695562,22.9467585481046,0 95.40177522175436,22.94167433499476,0 95.42693838520184,22.93588972630335,0 95.4478250858914,22.93677526568712,0 95.47725810152494,22.92430547749086,0 95.46526534879885,22.91203911647981,0 95.49752877133564,22.89712953373736,0 95.51979950713185,22.90583287178548,0 95.56292131464312,22.92746481933268,0 
+				</coordinates>
+			</LineString>
+		</Placemark>
+	</Folder>
+</Document>
+</kml>

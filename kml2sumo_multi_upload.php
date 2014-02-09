@@ -22,6 +22,9 @@
 	$rel_list = array();
 	$output_list = array();
 	
+	$ori = array();
+	$del = array();
+	
 	
 	function addNode($lineNum, $i, $x,$y) {
 		global $node_list;
@@ -53,6 +56,8 @@
 			$rel_list[$rel_count] = array($fromnode, $tonode);
 			$output_list[$rel_count] = array($fromnode, $tonode);
 			$rel_count++;
+			
+			
 		}
 	}
 	
@@ -83,7 +88,8 @@
 			
 			$its['x'] = (double)($D1/$D);
 			$its['y'] = (double)($D2/$D);
-			if(min($x1, $x2) < $its['x'] && $its['x'] < max($x1, $x2) && min($y1, $y2) < $its['y'] && $its['y'] < max($y1, $y2))
+			if(min($x1, $x2) < $its['x'] && $its['x'] < max($x1, $x2) && min($y1, $y2) < $its['y'] && $its['y'] < max($y1, $y2)
+			&& min($x3, $x4) < $its['x'] && $its['x'] < max($x3, $x4) && min($y3, $y4) < $its['y'] && $its['y'] < max($y3, $y4))
 				return $its;
 			else {
 			$its['x'] = '';
@@ -120,7 +126,6 @@
 		return $miles*1.609344*1000;
 	}
 
-	
 	for($num=0; $num < $numLine; $num++) {
 		$coord = $allLine[$num]->LineString->coordinates;
 		$coords = explode(' ', (string)$coord);
@@ -144,7 +149,7 @@
 		for ($i=0; $i < $ir; $i++) { 
 			//if($i <= $r) continue;
 			
-			
+			// $rel_list[$r][1] : '0n0'
 			if($node_list[$rel_list[$r][1]][0] == $node_list[$rel_list[$i][0]][0]) continue; 
 			$a = @check(
 				$node_list[$rel_list[$r][0]][0], $node_list[$rel_list[$r][0]][1], 
@@ -153,7 +158,10 @@
 				$node_list[$rel_list[$i][1]][0], $node_list[$rel_list[$i][1]][1]
 				);
 				
+			
+				
 			if($a['x'] != '') {
+				
 				$crosName = crosNode($a, $crossCount);
 				//crosLine($a, $r, $i, $rel_list[$r], $rel_list[$i]);	
 				
@@ -178,9 +186,15 @@
 					array_push($output_list[$r], $crosName);
 				}elseif($dist_bin > $tolerance && $dist_end < $tolerance) {
 					$key = array_search($rel_list[$r][1], $output_list[$r]);
-					unset($output_list[$r][$key]);
-						
-					array_push($output_list[$r], $crosName);
+					array_push($ori, $output_list[$r][$key]);
+					array_push($del, $crosName);
+					//unset($output_list[$r][$key]);
+					//foreach($output_list as $key => $value) {
+					//	if(array_search($rel_list[$r][1], $value)) {
+					//		$value[array_search($rel_list[$r][1], $value)] = $crosName;
+					//	}
+					//}
+					//array_push($output_list[$r], $crosName);
 				}elseif($dist_bin < $tolerance && $dist_end > $tolerance) {
 				/*
 					$key = array_search($rel_list[$r][1], $output_list[$r]);
@@ -189,18 +203,33 @@
 					array_push($output_list[$r], $crosName);
 				*/
 					$key = array_search($rel_list[$r][0], $output_list[$r]);
-					unset($output_list[$r][$key]);
-						
-					array_push($output_list[$r], $crosName);
+					array_push($ori, $output_list[$r][$key]);
+					array_push($del, $crosName);
+					//unset($output_list[$r][$key]);
+					//foreach($output_list as $key => $value) {
+					//	if(array_search($rel_list[$r][0], $value))
+					//		$value[array_search($rel_list[$r][0], $value)] = $crosName;
+					//}
+					//array_push($output_list[$r], $crosName);
 				
 				}else {
 					$key = array_search($rel_list[$r][0], $output_list[$r]);
-					unset($output_list[$r][$key]);
+					array_push($ori, $output_list[$r][$key]);
+					array_push($del, $crosName);
+					//unset($output_list[$r][$key]);
 					$key = array_search($rel_list[$r][1], $output_list[$r]);
-					unset($output_list[$r][$key]);
+					array_push($ori, $output_list[$r][$key]);
+					array_push($del, $crosName);
+					//unset($output_list[$r][$key]);
+					//foreach($output_list as $key => $value) {
+					//	if(array_search($rel_list[$r][0], $value))
+					//		$value[array_search($rel_list[$r][0], $value)] = $crosName;
+					//	if(array_search($rel_list[$r][1], $value))
+					//		$value[array_search($rel_list[$r][1], $value)] = $crosName;
+					//}
 						//echo "unset: "+$node_list[$rel_list[$r][0]]+"<br />";
 						//echo "unset: "+$node_list[$rel_list[$r][1]]+"<br />";
-					array_push($output_list[$r], $crosName);
+					//array_push($output_list[$r], $crosName);
 				}
 				$crossCount++;
 				//echo $a['x']." , ".$a['y']." , cross node Finish<br />";
@@ -217,6 +246,31 @@
 		Output xml format 
 	 */
 	
+	$IR = count($output_list);
+	
+	for($r=0; $r < $IR; $r++) {
+		//echo "$key, $value<br>";
+		if(in_array($output_list[$r][0], $ori)) {
+			$ans = array_search($output_list[$r][0], $ori);
+			//echo "$ans, ".$output_list[$r][$ans].", change to , $del[$ans]<br />";
+			$output_list[$r][0] = $del[$ans];
+		}
+		if(in_array($output_list[$r][1], $ori)) {
+			$ans = array_search($output_list[$r][1], $ori);
+			//echo "$ans, ".$output_list[$r][$ans].", change to , $del[$ans]<br />";
+			$output_list[$r][1] = $del[$ans];
+		}
+	}
+	
+
+	for($r=0; $r < count($output_list); $r++) {	
+		if($output_list[$r][1] == $output_list[$r][0]) {
+			array_splice($output_list, $r, 1);
+			
+		}
+		
+		
+	}
 	$IR = count($output_list);
 	for($r=0; $r < $IR; $r++) {
 		$sort = array();
@@ -240,12 +294,14 @@
 		asort($sort);
 		
 		$output_array = array();
+		
 		foreach($sort as $key => $value) {
 			$output_array[] = $key;
 		}
 		
 		$idNum = 0;
 		for($y=0; $y < $cont; $y++){
+			if($cont == 1) break;
 			if($y == $cont-1) continue;
 			else $Y = $y+1;
 			
@@ -258,8 +314,9 @@
 		}
 		
 	}
-	//var_dump($output_list);
+	
 	//var_dump($sort);
+	
 	
 	function Trans_UTM($lat, $lon) {
 		$temp = new gPoint();
@@ -306,8 +363,8 @@
 	$node_file = '<nodes>'.$node_content."\n</nodes>\n<!-- offset_x: $off_x, offset_y: $off_y -->";
 	$edge_file = '<edges>'.$edge_content."\n</edges>";
 	
-	$node_name = 'xml/nodes_m.xml';
-	$edge_name = 'xml/edges_m.xml';
+	$node_name = 'xml/nodes_m.nod.xml';
+	$edge_name = 'xml/edges_m.edg.xml';
 	
 	file_put_contents($node_name, $node_file);
 	file_put_contents($edge_name, $edge_file);
@@ -316,7 +373,7 @@
 	//var_dump($node_list);
 	//var_dump($rel_list);
 	//var_dump($offset_x);
-	echo '<a href="xml/nodes_m.xml" target="_blank">nodes_m.xml</a><br />';
-	echo '<a href="xml/edges_m.xml" target="_blank">edges_m.xml</a><br />';
+	echo '<a href="xml/nodes_m.nod.xml" target="_blank">nodes_m.nod.xml</a><br />';
+	echo '<a href="xml/edges_m.edg.xml" target="_blank">edges_m.edg.xml</a><br />';
 	echo '<a href="index.html">Home</a>';
 	

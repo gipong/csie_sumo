@@ -1,0 +1,16 @@
+<edges>
+<edge id='0_0-1' fromnode='c0' tonode='c1' priority='75' nolanes='2' speed='40' />
+<edge id='0_0-2' fromnode='c1' tonode='c0' priority='75' nolanes='2' speed='40' />
+<edge id='1_0-1' fromnode='0n3' tonode='c1' priority='75' nolanes='2' speed='40' />
+<edge id='1_0-2' fromnode='c1' tonode='0n3' priority='75' nolanes='2' speed='40' />
+<edge id='2_0-1' fromnode='c3' tonode='c1' priority='75' nolanes='2' speed='40' />
+<edge id='2_0-2' fromnode='c1' tonode='c3' priority='75' nolanes='2' speed='40' />
+<edge id='2_1-1' fromnode='c1' tonode='1n1' priority='75' nolanes='2' speed='40' />
+<edge id='2_1-2' fromnode='1n1' tonode='c1' priority='75' nolanes='2' speed='40' />
+<edge id='3_0-1' fromnode='1n1' tonode='1n2' priority='75' nolanes='2' speed='40' />
+<edge id='3_0-2' fromnode='1n2' tonode='1n1' priority='75' nolanes='2' speed='40' />
+<edge id='4_0-1' fromnode='1n2' tonode='1n3' priority='75' nolanes='2' speed='40' />
+<edge id='4_0-2' fromnode='1n3' tonode='1n2' priority='75' nolanes='2' speed='40' />
+<edge id='5_0-1' fromnode='c3' tonode='c0' priority='75' nolanes='2' speed='40' />
+<edge id='5_0-2' fromnode='c0' tonode='c3' priority='75' nolanes='2' speed='40' />
+</edges>
