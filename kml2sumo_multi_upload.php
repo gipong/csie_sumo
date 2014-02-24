@@ -347,10 +347,21 @@
 		$transCod = Trans_UTM((float)$node_list[$key][0], (float)$node_list[$key][1]);	
 		//$transCod = UTM((float)$node_list[$key][1], (float)$node_list[$key][0]);
 		//var_dump($transCod);
-		$string = "\n<node id='".$key."' x='".$transCod['x']."' y='".$transCod['y']."' type='traffic_light' />";
 		
-		//$string = "\n<node id='".$key."' x='".bcadd($transCod['x'], $off_x, 6)."' y='".bcadd($transCod['y'], $off_y, 6)."' type='traffic_light' />";
-		//$string = "\n<node id='".$key."' x='".bcadd($transCod['lon'], $off_x, 6)."' y='".bcadd($transCod['lat'], $off_y, 6)."' type='traffic_light' />";
+		/* without offset
+		
+		if($key[0] == 'c')
+			$string = "\n<node id='".$key."' x='".$transCod['x']."' y='".$transCod['y']."' type='traffic_light' />";
+		else 
+			$string = "\n<node id='".$key."' x='".$transCod['x']."' y='".$transCod['y']."' type='priority' />";
+		*/
+		
+		/* offest */
+		if($key[0] == 'c')
+			$string = "\n<node id='".$key."' x='".bcsub($transCod['x'], $off_x, 6)."' y='".bcsub($transCod['y'], $off_y, 6)."' type='traffic_light' />";
+		else 
+			$string = "\n<node id='".$key."' x='".bcsub($transCod['x'], $off_x, 6)."' y='".bcsub($transCod['y'], $off_y, 6)."' type='priority' />";
+		
 		$node_content = $node_content.$string;
 		//$csv_string = bcadd($transCod['x'], $off_x, 6).", ".bcadd($transCod['y'], $off_y, 6)."\n";
 		$csv_string = $transCod['y'].", ".$transCod['x']."\n";

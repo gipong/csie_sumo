@@ -100,8 +100,8 @@
 	$node_file = '<nodes>'.$node_content."\n</nodes>\n";
 	$edge_file = '<edges>'.$edge_content."\n</edges>";
 	
-	$node_name = 'xml/nodes_om.xml';
-	$edge_name = 'xml/edges_om.xml';
+	$node_name = 'xml/nodes_om.nod.xml';
+	$edge_name = 'xml/edges_om.edg.xml';
 	file_put_contents($node_name, $node_file);
 	file_put_contents($edge_name, $edge_file);
 	
@@ -109,8 +109,8 @@
 	//var_dump($way_list);
 	//var_dump($offset_x);
 	//echo $offset_x[0];
-	echo '<a href="xml/nodes_om.xml" target="_blank">nodes_om.xml</a><br />';
-	echo '<a href="xml/edges_om.xml" target="_blank">edges_om.xml</a><br />';
+	echo '<a href="xml/nodes_om.nod.xml" target="_blank">nodes_om.nod.xml</a><br />';
+	echo '<a href="xml/edges_om.edg.xml" target="_blank">edges_om.edg.xml</a><br />';
 	echo '<a href="index.html">Home</a>';
 	
 	

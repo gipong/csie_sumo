@@ -1,26 +1,53 @@
+<!DOCTYPE html>
 <html>
+<head>
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+</head>
 <body>
-
-<form action="kml2sumo_multi_upload.php" method="post"
-enctype="multipart/form-data">
-<label for="file">KML Filename:</label>
-<input type="file" name="file" id="file"><br>
-Tolerance:<input type="text" name="tolerance" id="tolerance"><br>
-<!-- Timezone:<input type="text" name="timezone" id="timezone"><br>  -->
-<input type="submit" name="submit" value="Submit">
+<div class="container">
+<div class="page-header"><h1>KML Part</h1></div>
+<form action="kml2sumo_multi_upload.php" method="post" enctype="multipart/form-data">
+	<label for="file">KML File</label>
+	<input type="file" name="file" id="file"><br>
+	<label >Tolerance</label><input class="form-control" type="text" name="tolerance" id="tolerance" placeholder="e.g. 10, unit meters"><br>
+	<!-- Timezone:<input type="text" name="timezone" id="timezone"><br>  -->
+	<input class="btn btn-lg btn-primary" type="submit" name="submit" value="Submit">
 </form>
-KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.kml(without folder element)</a><hr>
-<form action="osm2sumo_upload.php" method="post"
-enctype="multipart/form-data">
-<label for="file">OSM Filename:</label>
-<input type="file" name="file" id="file"><br><br>
-North:<input type="text" name="north" id="north"><br>
-West :<input type="text" name="west" id="west"><br>
-East :<input type="text" name="east" id="east"><br>
-South:<input type="text" name="south" id="south"><br><br>
-<input type="submit" name="submit" value="Submit">
-</form>
-OSM test data:<a href="upload/map2.osm">map2.osm</a><hr>
+<br />
+<blockquote>
+KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.kml(without folder element)</a>
+</blockquote>
 
+<div class="page-header"><h1>OSM Part</h1></div>
+<form action="osm2sumo_upload.php" method="post" enctype="multipart/form-data">
+	<label for="file">OSM File</label>
+	<input type="file" name="file" id="file"><br><br>
+	<label >Area</label>
+	<table style="text-align:center;">
+	<tr>
+	  <td></td>
+	  <td>North<br><input class="form-control" type="text" name="north" id="north"></td>		
+	  <td></td>
+	</tr>
+	<tr>
+	  <td>West<br><input class="form-control" type="text" name="west" id="west"></td>
+	  <td></td>		
+	  <td>East<br><input class="form-control" type="text" name="east" id="east"></td>
+	</tr>
+	<tr>
+	  <td></td>
+	  <td>South<br><input class="form-control" type="text" name="south" id="south"><br></td>		
+	  <td></td>
+	</tr>
+	</table>
+	<input class="btn btn-lg btn-primary" type="submit" name="submit" value="Submit">
+</form>
+<br />
+<blockquote>
+OSM test data:<a href="upload/map2.osm">map2.osm</a><br />
+<img src="osm_ex.png" class="img-thumbnail">
+</blockquote>
+</div>
 </body>
 </html>
