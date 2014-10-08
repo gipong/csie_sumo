@@ -36,9 +36,7 @@
 			<color>ff0000ff</color>
 		</LineStyle>
 	</Style>
-	<Folder>
-		<name>test</name>
-		<open>1</open>
+	
 		<Placemark>
 			<name>未命名的路徑</name>
 			<styleUrl>#m_ylw-pushpin</styleUrl>
@@ -79,6 +77,6 @@
 				</coordinates>
 			</LineString>
 		</Placemark>
-	</Folder>
+	
 </Document>
 </kml>

@@ -16,14 +16,15 @@
 </form>
 <br />
 <blockquote>
-KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.kml(without folder element)</a>
+KML test data:<a href="upload/folder.kml">folder.kml</a> , <a href="upload/test.kml">nfolder.kml(without folder element)</a>
 </blockquote>
 
 <div class="page-header"><h1>OSM Part</h1></div>
 <form action="osm2sumo_upload.php" method="post" enctype="multipart/form-data">
 	<label for="file">OSM File</label>
 	<input type="file" name="file" id="file"><br><br>
-	<label >Area</label>
+	<!-- <label >Tolerance</label><input class="form-control" type="text" name="tolerance" id="tolerance" placeholder="e.g. 10, unit meters"><br> -->
+	<label >Area ( Optional )</label>
 	<table style="text-align:center;">
 	<tr>
 	  <td></td>
@@ -45,7 +46,7 @@ KML test data:<a href="upload/long.kml">long.kml</a> , <a href="upload/2.kml">2.
 </form>
 <br />
 <blockquote>
-OSM test data:<a href="upload/map2.osm">map2.osm</a><br />
+OSM test data:<a href="upload/map.osm">map.osm</a><br />
 <img src="osm_ex.png" class="img-thumbnail">
 </blockquote>
 </div>

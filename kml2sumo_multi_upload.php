@@ -3,6 +3,7 @@
 	
 	move_uploaded_file($_FILES["file"]["tmp_name"],"upload/".$_FILES["file"]["name"]);
 	
+	// 檢查不同 KML 檔案所包覆標籤，針對不同 tag 進行擷取
 	$kml = simplexml_load_file("upload/".$_FILES["file"]["name"]);
 	if($kml->Document->Folder)
 		$allLine = $kml->Document->Folder->Placemark;
@@ -11,6 +12,7 @@
 	$numLine = count($allLine);
 	$tolerance = $_POST['tolerance']; // unit: meters
 	
+	// 宣告欲輸出檔案內容與暫存變數
 	$node_content = '';
 	$edge_content = '';
 	$rel = 0;
@@ -25,13 +27,14 @@
 	$ori = array();
 	$del = array();
 	
-	
+	// 加入單點坐標值與識別名稱
 	function addNode($lineNum, $i, $x,$y) {
 		global $node_list;
 		$id = $lineNum.'n'.$i;
 		$node_list["$id"] = array($x, $y);
 	}
 
+	// 加入交叉點坐標值與識別名稱
 	function crosNode($cross, $crossCount) {
 		global $node_list;
 		$id = 'c'.$crossCount;
@@ -43,6 +46,7 @@
 		return $id;
 	}
 	
+	// 加入線段所屬連結點與其識別名稱
 	function addRel($lineNum, $rel) {
 		global $edge_content;
 		
@@ -61,6 +65,7 @@
 		}
 	}
 	
+	// 加入交叉線段項目
 	function crosLine($cross, $r, $R, $r_node, $R_node) {
 		global $rel_list;
 		global $crossCount;
@@ -72,6 +77,7 @@
 				
 	}
 	
+	// 檢查兩線段是否具有交叉情形，若有則回傳交叉後單點坐標值
 	function check($x1, $y1, $x2, $y2, $x3, $y3, $x4, $y4) {
 		(double)$a1 = ($y1 - $y2);
 		(double)$a2 = ($y3 - $y4);
@@ -103,6 +109,10 @@
 		}
 	}
 	
+	/* 
+	 * 計算兩點之間距離，distance(點1緯度, 點1經度, 點2緯度, 點2經度)
+	 * return 兩點距離 (單位: 公尺)
+	 */
 	function distance($lat1, $lng1, $lat2, $lng2) {
 	/*
 		$earthRadius = 3958.75;
@@ -126,6 +136,7 @@
 		return $miles*1.609344*1000;
 	}
 
+	// 從原始資料中擷取必要經緯度，並加入點位與其關係
 	for($num=0; $num < $numLine; $num++) {
 		$coord = $allLine[$num]->LineString->coordinates;
 		$coords = explode(' ', (string)$coord);
@@ -145,6 +156,8 @@
 	}
 	
 	$ir = count($rel_list);	
+	
+	// 判斷是否具有交叉點，若有則新增交叉點與線段關係
 	for($r=0;$r < $ir; $r++) {
 		for ($i=0; $i < $ir; $i++) { 
 			//if($i <= $r) continue;
@@ -243,10 +256,11 @@
 	$offset_y = array();
 	
 	/*
-		Output xml format 
+		輸出 XML 格式，整理數據後即進行字串輸出
 	 */
 	
 	$IR = count($output_list);
+	
 	
 	for($r=0; $r < $IR; $r++) {
 		//echo "$key, $value<br>";
@@ -317,7 +331,10 @@
 	
 	//var_dump($sort);
 	
-	
+	/* 
+	 * 將經緯度轉換為直角坐標系
+	 * return  轉換後坐標
+	 */
 	function Trans_UTM($lat, $lon) {
 		$temp = new gPoint();
 		$temp->setLongLat($lon, $lat);
